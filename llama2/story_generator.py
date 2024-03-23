@@ -1,12 +1,10 @@
 import json
-from vllm import EngineArgs, LLMEngine, SamplingParams, RequestOutput, LLM
-from vllm.lora.request import LoRARequest
 from utils import *
 import genre as import_genre
 from genre import Genre
 from ingest_story_json import ingest_story_json
 import logging.config
-from llm_engine import GenEngine
+from test_api import call_api
 
 class StoryGenerator:
     def __init__(self, debug=False):
@@ -27,7 +25,6 @@ class StoryGenerator:
         self.premise = None
         self.characters = None
         self.plot_points = None
-        self.model = GenEngine()
         self.debug = debug
         # Load the logging configuration file
         logging.config.fileConfig('logging.conf')
@@ -102,23 +99,16 @@ Using the provided context for the previous plot point, write a narrative sectio
 
     def _summarise_plot_point(self, plot_point_idx: str) -> str:
         self.logger.info(f"Summarising plot point {plot_point_idx}")
-        sampling_params = SamplingParams(max_tokens=4096,
-                                         # best_of=5,
-                                         # set it same as max_seq_length in SFT Trainer
-                                         temperature=0.3,
-                                         # skip_special_tokens=True,
-                                         # use_beam_search=True,
-                                         )
+        sampling_params = {"max_tokens": 4096, "temperature": 0.3, "repetition_penalty": 1.15, "top_p": 1, "min_p": 0.1}
 
         prompt = """[INST]You are a helpful assistant to a writer. You have been asked to summarise the following narrative section into a few sentences. The plot is as follows: {}[/INST]"""
         summary = ""
         try:
             text = self.plot_points[plot_point_idx]['text']
             prompt = prompt.format(text)
-            output = self.model.process_requests(
-                [(prompt, sampling_params, None)])
-            self.plot_points[plot_point_idx]['summary'] = output[0].outputs[0].text
-            summary = output[0].outputs[0].text
+            output = call_api({"prompt": prompt, "stream": False, "sampling_params": sampling_params})
+            self.plot_points[plot_point_idx]['summary'] = output
+            summary = output
         except KeyError:
             summary = self.plot_points[plot_point_idx]['description']
 
@@ -130,14 +120,8 @@ Using the provided context for the previous plot point, write a narrative sectio
 
     def generate_plot_points(self):
         self.logger.info("Generating plot points")
-        sampling_params = SamplingParams(max_tokens=4096,
-                                         # best_of=5,
-                                         # set it same as max_seq_length in SFT Trainer
-                                         temperature=0.6,
-                                         # skip_special_tokens=True,
-                                         # use_beam_search=True,
-                                         stop=[".\n"]
-                                         )
+        
+        sampling_params = {"max_tokens": 4096, "temperature": 0.6, "stop": ["\n"], "repetition_penalty": 1.15, "top_p": 1, "min_p": 0.1}
 
         # generate the plot points
         for plot_point_idx, plot_point_desc in self.PLOT_POINTS_NUMBERING:
@@ -151,15 +135,10 @@ Using the provided context for the previous plot point, write a narrative sectio
                     self.genre.__str__(), self.structure_template,
                     self._get_prompt_ready_premise(), current_plot_prompt,
                     plot_point_idx, plot_point_idx, plot_point_desc)
-                output = ""
-                counter = 0
-                while output == "":
-                    counter += 1
-                    output = self.model.process_requests(
-                        [(plot_point_prompt, sampling_params, None)])
-                    output = output[0].outputs[0].text
+                
+                output = call_api({"prompt": plot_point_prompt, "stream": False, "sampling_params": sampling_params})
                 self.logger.info(
-                    f"Generated plot point {plot_point_idx} in {counter} attempts")
+                    f"Generated plot point {plot_point_idx}")
                 # add the generated plot point to the plot points
                 self.plot_points[plot_point_idx] = {
                     "description": output.strip()}
@@ -188,22 +167,16 @@ Using the provided context for the previous plot point, write a narrative sectio
         self.logger.info("Finished generating plot points")
         return
 
-    def generate_story(self, t=0.7):
+    def generate_story(self, t=0.8):
         self.logger.info("Generating story")
-        sampling_params = SamplingParams(max_tokens=4096,
-                                         temperature=t,
-                                         top_k=50,
-                                         repetition_penalty=0.5,
-                                         frequency_penalty=1.19,
-                                         )
+        sampling_params = {"max_tokens": 4096, "temperature": t, "repetition_penalty": 1.15, "top_p": 1, "min_p": 0.1}
 
         for plot_point_idx, plot_point_desc in self.PLOT_POINTS_NUMBERING:
             self.logger.info(f"Generating plot point {plot_point_idx}")
             draft_prompt = self._construct_draft_prompt(plot_point_idx)
             self.plot_points[plot_point_idx]['draft_prompt'] = draft_prompt
-            output = self.model.process_requests(
-                [(draft_prompt, sampling_params, self.genre)])
-            output = output[0].outputs[0].text
+            output = call_api({"prompt": draft_prompt, "stream": False, "sampling_params": sampling_params, "lora": "science_fiction"})
+    
 
             self.plot_points[plot_point_idx]['text'] = output
             self.logger.info(f"Generated plot point {plot_point_idx}")

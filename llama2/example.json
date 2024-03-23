@@ -1,0 +1,14 @@
+{
+  "id": 0,
+  "genre": "science_fiction",
+  "story_generation": {
+    "premise": "A intrepid young interplanetary miner discovers that he is a clone and that the Martian government has bought the rights to his body.",
+    "characters": [
+        {"name": "Steve Robinson", "description": "A young man"}
+    ],
+    "plot_points": {
+      "1.1": {"description": "Steve wakes up in the work dormitory. He has a strange feeling he can't shake. It's as if he wasn't alive an hour ago.", "characters": ["Steve Robinson"]}
+    }
+  }
+
+}

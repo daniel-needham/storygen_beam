@@ -1,0 +1,38 @@
+2024-03-23 15:04:01 - INFO - Generating plot points
+2024-03-23 15:04:02 - INFO - Generated plot point 1.2
+2024-03-23 15:04:03 - INFO - Generated plot point 1.3
+2024-03-23 15:04:05 - INFO - Generated plot point 2.1
+2024-03-23 15:04:06 - INFO - Generated plot point 2.2
+2024-03-23 15:04:06 - INFO - Generated plot point 2.3
+2024-03-23 15:04:06 - INFO - Generated plot point 3.1
+2024-03-23 15:04:07 - INFO - Generated plot point 3.2
+2024-03-23 15:04:08 - INFO - Generated plot point 3.3
+2024-03-23 15:04:08 - INFO - Finished generating plot points
+2024-03-23 15:04:08 - INFO - Generating story
+2024-03-23 15:04:08 - INFO - Generating plot point 1.1
+2024-03-23 15:04:18 - INFO - Generated plot point 1.1
+2024-03-23 15:04:18 - INFO - Generating plot point 1.2
+2024-03-23 15:04:18 - INFO - Summarising plot point 1.1
+2024-03-23 15:04:39 - INFO - Generated plot point 1.2
+2024-03-23 15:04:39 - INFO - Generating plot point 1.3
+2024-03-23 15:04:39 - INFO - Summarising plot point 1.2
+2024-03-23 15:05:09 - INFO - Generated plot point 1.3
+2024-03-23 15:05:09 - INFO - Generating plot point 2.1
+2024-03-23 15:05:09 - INFO - Summarising plot point 1.3
+2024-03-23 15:05:09 - INFO - Generated plot point 2.1
+2024-03-23 15:05:09 - INFO - Generating plot point 2.2
+2024-03-23 15:05:09 - INFO - Summarising plot point 2.1
+2024-03-23 15:05:10 - INFO - Generated plot point 2.2
+2024-03-23 15:05:10 - INFO - Generating plot point 2.3
+2024-03-23 15:05:10 - INFO - Summarising plot point 2.2
+2024-03-23 15:05:11 - INFO - Generated plot point 2.3
+2024-03-23 15:05:11 - INFO - Generating plot point 3.1
+2024-03-23 15:05:11 - INFO - Summarising plot point 2.3
+2024-03-23 15:05:13 - INFO - Generated plot point 3.1
+2024-03-23 15:05:13 - INFO - Generating plot point 3.2
+2024-03-23 15:05:13 - INFO - Summarising plot point 3.1
+2024-03-23 15:05:15 - INFO - Generated plot point 3.2
+2024-03-23 15:05:16 - INFO - Generating plot point 3.3
+2024-03-23 15:05:16 - INFO - Summarising plot point 3.2
+2024-03-23 15:05:19 - INFO - Generated plot point 3.3
+2024-03-23 15:05:19 - INFO - Finished generating story

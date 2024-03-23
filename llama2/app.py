@@ -56,12 +56,14 @@ app = App(
 def load_models():
     engine_args = AsyncEngineArgs(model="mistralai/Mistral-7B-Instruct-v0.2",
                              download_dir="./model_weights",
+                             dtype="half",
+                             gpu_memory_utilization=1.0,
                              max_model_len=4096,
                              enable_lora=True,
                              max_loras=1,
                              max_lora_rank=16,
                              max_cpu_loras=2,
-                             max_num_seqs=256)
+                             max_num_seqs=4096)
     model = AsyncLLMEngine.from_engine_args(engine_args)
     lora = snapshot_download("ogdanneedham/mistral-sf-0.1-lora", cache_dir="./model_weights")
     return model, lora
@@ -76,25 +78,35 @@ def web_server(**context):
         request_dic = await request.json()
         prompt = request_dic.get("prompt")
         stream = request_dic.get("stream", False)
+        lora = request_dic.get("lora", False)
 
         if not prompt:
             prompt = """[INST] Eulogise about the beauty of fallbacks [/INST]"""
         
-        ### todo json sampling params
-        sampling_params = SamplingParams(max_tokens=4096,
-                                    temperature=0.8,
-                                    repetition_penalty=1.15,
-                                    top_p=1,
-                                    min_p=0.1)
+        if request_dic.get("sampling_params"):
+            sampling_params = SamplingParams(**request_dic["sampling_params"])
+        else:
+            sampling_params = SamplingParams(max_tokens=4096,
+                                        temperature=0.8,
+                                        repetition_penalty=1.15,
+                                        top_p=1,
+                                        min_p=0.1)
         
         engine, sf_lora = context["context"]
 
         request_id = random_uuid()
 
-        results_generator = engine.generate(prompt, sampling_params, request_id, lora_request=None)
 
-       
-
+        if lora == "science_fiction":
+            lora_request = LoRARequest("sf-lora", 1, sf_lora)
+        else:
+            lora_request = None
+        
+        results_generator = engine.generate(prompt, sampling_params, request_id, lora_request=lora_request)
+        
+        # TODO return the result only, no prompt
+        # FIXME fucker
+        
         # streaming response
         async def stream_results() -> AsyncGenerator[bytes, None]:
             async for request_output in results_generator:

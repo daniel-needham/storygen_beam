@@ -5,3 +5,6 @@ venv
 .git
 *.pyc
 __pycache__
+example.json
+structure_template.txt
+outputs
