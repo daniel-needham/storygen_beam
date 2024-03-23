@@ -107,5 +107,22 @@ def web_server(**context):
 
         if stream:
             return StreamingResponse(stream_results())
+        
+        # non-streaming response
+        final_output = None
+        async for request_output in results_generator:
+            if await request.is_disconnected():
+                #abort if client disconnects
+                await engine.abort(request_id)
+                return Response(status_code=499)
+            final_output = request_output
+        
+        assert final_output is not None
+        prompt = final_output.prompt
+        text_outputs = [
+            prompt + output.text for output in final_output.outputs
+        ]
+        ret = {"text": text_outputs}
+        return JSONResponse(ret)
 
     return api
