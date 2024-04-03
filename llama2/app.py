@@ -104,15 +104,13 @@ def web_server(**context):
         
         results_generator = engine.generate(prompt, sampling_params, request_id, lora_request=lora_request)
         
-        # TODO return the result only, no prompt
-        # FIXME fucker
+        # TODO return the result only, no prompt #
         
         # streaming response
         async def stream_results() -> AsyncGenerator[bytes, None]:
             async for request_output in results_generator:
-                prompt = request_output.prompt
                 text_outputs = [
-                    prompt + output.text for output in request_output.outputs
+                    output.text for output in request_output.outputs
                 ]
                 ret = {"text": text_outputs}
                 yield (json.dumps(ret) + "\0").encode("utf-8")
@@ -130,9 +128,8 @@ def web_server(**context):
             final_output = request_output
         
         assert final_output is not None
-        prompt = final_output.prompt
         text_outputs = [
-            prompt + output.text for output in final_output.outputs
+            output.text for output in final_output.outputs
         ]
         ret = {"text": text_outputs}
         return JSONResponse(ret)

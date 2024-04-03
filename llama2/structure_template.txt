@@ -1,4 +1,4 @@
-[Story Structure]
+## Story Structure
 Setup
 1.1 Exposition. The status quo or ‘ordinary world’ is established.
 1.2 Inciting Incident. An event that sets the story in motion.
@@ -13,5 +13,3 @@ Resolution
 3.1 Pre Climax. The night is darkest before dawn. The protagonist must pull themselves together and choose between decisive action and failure.
 3.2 Climax. They faces off against her antagonist one last time. Will they prevail?
 3.3 Denouement. All loose ends are tied up. The reader discovers the consequences of the climax. A new status quo is established.
-[/Story Structure]
-

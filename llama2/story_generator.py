@@ -45,7 +45,7 @@ class StoryGenerator:
 
     def _plot_points_to_prompt(self):
         prompt = """
-[Story Events]
+## Story Events
 Setup
 
 1.1 {}
@@ -63,7 +63,6 @@ Resolution
 3.1 {}
 3.2 {}
 3.3 {}
-[/Story Events]
 """
         values = []
 
@@ -78,21 +77,23 @@ Resolution
 
     def _construct_draft_prompt(self, plot_point_idx: str) -> str:
         # todo add characters to prompt
-        prompt = """[INST] You are a renowned creative writer specialising in the genre of {}. {}{}
-Using the provided context for the previous plot point, write a narrative section for the following plot point "{}". Be creative and ensure that the narrative sets up the upcoming passage. [/INST]"""
+        prompt = """[INST] You are a renowned creative writer specialising in the genre of {}. {}
+Using the provided summary for the previous plot point, write a narrative section for the following plot point. Be creative and ensure that the narrative builds upon the prompt.
+## Plot Prompt
+{}[/INST]"""
 
         pp, _ = zip(*self.PLOT_POINTS_NUMBERING)
         pp_true_index = pp.index(plot_point_idx)
         prev = pp_true_index > 0
         next = pp_true_index < len(pp) - 1
 
-        prev = "\nIn the previous plot point:\n" + self.plot_points[
+        prev = "\n## Plot Summary\n" + self.plot_points[
             pp[pp_true_index - 1]].get('summary', self._summarise_plot_point(
             pp[pp_true_index - 1])) + "\n" if prev else ""
         next = "\nIn the upcoming plot point:\n" + self.plot_points[
             pp[pp_true_index + 1]].get("description") + "\n" if next else ""
 
-        prompt = prompt.format(self.genre.__str__(), prev, next,
+        prompt = prompt.format(self.genre.__str__(), prev,
                                self.plot_points[plot_point_idx]['description'])
 
         return prompt
@@ -130,7 +131,7 @@ Using the provided context for the previous plot point, write a narrative sectio
             else:
                 # generate the plot point
                 current_plot_prompt = self._plot_points_to_prompt()
-                plot_point_prompt = """[INST]You are a renowned writer specialising in the genre of {}. You are able to create engaging narratives following a three act structure. Using the [Story Structure] outline, fill the [Story Events] suitable for the story as outlined in the premise.\n{}{}{}\nCreate a single event for the plot point {}, keep it concise and avoid repeating previous plot points.[/INST] {} {}:"""
+                plot_point_prompt = """[INST]You are a renowned writer specialising in the genre of {}. You are able to create engaging narratives following a three act structure. Using the Story Structure guide, fill the Story Events suitable for the story as outlined in the premise.\n{}{}{}\nCreate a single event for the plot point {}, keep it concise and avoid repeating previous plot points.[/INST] {} {}:"""
                 plot_point_prompt = plot_point_prompt.format(
                     self.genre.__str__(), self.structure_template,
                     self._get_prompt_ready_premise(), current_plot_prompt,
@@ -175,7 +176,7 @@ Using the provided context for the previous plot point, write a narrative sectio
             self.logger.info(f"Generating plot point {plot_point_idx}")
             draft_prompt = self._construct_draft_prompt(plot_point_idx)
             self.plot_points[plot_point_idx]['draft_prompt'] = draft_prompt
-            output = call_api({"prompt": draft_prompt, "stream": False, "sampling_params": sampling_params, "lora": "science_fiction"})
+            output = call_api({"prompt": draft_prompt, "stream": False, "sampling_params": sampling_params}) #"lora": "science_fiction"
     
 
             self.plot_points[plot_point_idx]['text'] = output
@@ -183,13 +184,13 @@ Using the provided context for the previous plot point, write a narrative sectio
 
             if self.debug:
                 print(f"Generated plot point {plot_point_idx} as\n-----------------------------\n{output}")
-
         self.logger.info("Finished generating story")
 
         #create a text file with the story
         with open(f'outputs/{self.id}.txt', 'w') as f:
             for plot_point_idx, plot_point_desc in self.PLOT_POINTS_NUMBERING:
                 f.write(f"{plot_point_idx}: {plot_point_desc}\n")
+                f.write("------------------------------------------\n")
                 f.write(f"{self.plot_points[plot_point_idx]['text']}\n\n")
 
         #create a json file with the plot points
@@ -200,4 +201,4 @@ Using the provided context for the previous plot point, write a narrative sectio
 sg = StoryGenerator(debug=True)
 sg.ingest_structure('example.json')
 sg.generate_plot_points()
-sg.generate_story()
+sg.generate_story(t=0.6)
