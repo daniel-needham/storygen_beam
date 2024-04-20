@@ -54,7 +54,7 @@ app = App(
 )
 
 def load_models():
-    engine_args = AsyncEngineArgs(model="mistralai/Mistral-7B-Instruct-v0.2",
+    engine_args = AsyncEngineArgs(model="mistralai/Mistral-7B-Instruct-v0.2", #mistralai/Mistral-7B-Instruct-v0.2 #teknium/OpenHermes-2.5-Mistral-7B #Open-Orca/Mistral-7B-OpenOrca
                              download_dir="./model_weights",
                              dtype="half",
                              gpu_memory_utilization=1.0,
@@ -65,7 +65,7 @@ def load_models():
                              max_cpu_loras=2,
                              max_num_seqs=4096)
     model = AsyncLLMEngine.from_engine_args(engine_args)
-    lora = snapshot_download("ogdanneedham/mistral-sf-0.1-lora", cache_dir="./model_weights")
+    lora = snapshot_download("ogdanneedham/mistral-sf-0.2-lora", cache_dir="./model_weights")
     return model, lora
 
 
@@ -73,6 +73,7 @@ def load_models():
 def web_server(**context):
     api = FastAPI()
 
+    
     @api.post("/generate")
     async def generate(request: Request) -> Response:
         request_dic = await request.json()
@@ -96,15 +97,12 @@ def web_server(**context):
 
         request_id = random_uuid()
 
-
         if lora == "science_fiction":
             lora_request = LoRARequest("sf-lora", 1, sf_lora)
         else:
             lora_request = None
         
         results_generator = engine.generate(prompt, sampling_params, request_id, lora_request=lora_request)
-        
-        # TODO return the result only, no prompt #
         
         # streaming response
         async def stream_results() -> AsyncGenerator[bytes, None]:
