@@ -54,26 +54,19 @@ app = App(
 )
 
 def load_models():
-    login(token="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")
-    # engine_args = AsyncEngineArgs(model="mistralai/Mistral-7B-Instruct-v0.2", #mistralai/Mistral-7B-Instruct-v0.2 #teknium/OpenHermes-2.5-Mistral-7B #Open-Orca/Mistral-7B-OpenOrca
-    #                          download_dir="./model_weights",
-    #                          dtype="half",
-    #                          gpu_memory_utilization=1.0,
-    #                          max_model_len=4096,
-    #                          enable_lora=True,
-    #                          max_loras=1,
-    #                          max_lora_rank=16,
-    #                          max_cpu_loras=2,
-    #                          max_num_seqs=4096)
-    engine_args= AsyncEngineArgs(model="meta-llama/Meta-Llama-3-8B-Instruct",
+    engine_args = AsyncEngineArgs(model="mistralai/Mistral-7B-Instruct-v0.2", #mistralai/Mistral-7B-Instruct-v0.2 #teknium/OpenHermes-2.5-Mistral-7B #Open-Orca/Mistral-7B-OpenOrca
                              download_dir="./model_weights",
                              dtype="half",
                              gpu_memory_utilization=1.0,
-                             max_model_len=8092,
-                             enable_lora=False)
+                             max_model_len=4096,
+                             enable_lora=True,
+                             max_loras=1,
+                             max_lora_rank=64,
+                             max_cpu_loras=2,
+                             max_num_seqs=4096)
     model = AsyncLLMEngine.from_engine_args(engine_args)
     lora_sf = snapshot_download("ogdanneedham/mistral-sf-0.2-lora", cache_dir="./model_weights")
-    lora_gs = snapshot_download("ogdanneedham/mistral-gs-0.6-lora", cache_dir="./model_weights")
+    lora_gs = snapshot_download("ogdanneedham/mistral-gs-big-lora", cache_dir="./model_weights")
     return model, lora_sf, lora_gs
 
 
